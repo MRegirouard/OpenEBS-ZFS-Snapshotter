@@ -1,0 +1,12 @@
+# Creates a VolumeSnapshot, a custom resource that represents a snapshot of a PersistentVolumeClaim
+# The OpenEBS CSI driver will then take a ZFS snapshot, and it will be visible in the ZFS pool
+# The ManageSnaps.sh script will fill in the variables below
+apiVersion: snapshot.storage.k8s.io/v1beta1
+kind: VolumeSnapshot
+metadata:
+  name: ${NAME_PREFIX}${PVC_NAME}-${DATE}
+  namespace: ${NAMESPACE}
+spec:
+  volumeSnapshotClassName: ${SNAPSHOT_CLASS}
+  source:
+    persistentVolumeClaimName: ${PVC_NAME}
