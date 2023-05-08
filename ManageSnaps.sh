@@ -19,10 +19,15 @@ if [ -z "$PVC_NAMES" ]; then
 	exit 1
 fi
 
+if [ -z "$NAMESPACES" ]; then
+	echo "No namespaces given to take snapshots in, exiting..."
+	exit 1
+fi
+
 echo ""
 echo "Settings: "
-echo "NAMESPACE: $NAMESPACE"
 echo "SNAPSHOT_CLASS: $SNAPSHOT_CLASS"
+echo "NAMESPACES: $NAMESPACES"
 echo "PVC_NAMES: $PVC_NAMES"
 echo "TIMEZONE: $TIMEZONE"
 echo "DATE_FORMAT: $DATE_FORMAT"
@@ -36,16 +41,21 @@ echo "Current date: $DATE"
 echo "timegaps reference date: $REF_DATE"
 sed -i 's@${NAME_PREFIX}@'"$NAME_PREFIX"'@' /VolumeSnapshot.yaml
 sed -i 's@${DATE}@'"$DATE"'@' /VolumeSnapshot.yaml
-sed -i 's@${NAMESPACE}@'"$NAMESPACE"'@' /VolumeSnapshot.yaml
 sed -i 's@${SNAPSHOT_CLASS}@'"$SNAPSHOT_CLASS"'@' /VolumeSnapshot.yaml
 
 echo "Managing snapshots..."
 
-for PVC in $PVC_NAMES; do
+PVC_NAMES_ARR=($PVC_NAMES)
+NAMESPACES_ARR=($NAMESPACES)
+
+for ((i=0; i<${#PVC_NAMES_ARR[@]}; i++)) do
+	PVC=${PVC_NAMES_ARR[$i]}
+	NAMESPACE=${NAMESPACES_ARR[$i]}
 	echo ""
 	echo ""
-	echo "Managing snapshots of PVC \"$PVC\"..."
+	echo "Managing snapshots of PVC \"$PVC\" in namespace \"$NAMESPACE\"..."
 	sed 's@${PVC_NAME}@'"$PVC"'@' /VolumeSnapshot.yaml > /VolumeSnapshot-PVC.yaml
+	sed -i 's@${NAMESPACE}@'"$NAMESPACE"'@' /VolumeSnapshot-PVC.yaml
 
 	echo "Taking new snapshot..."
 	kubectl create -f /VolumeSnapshot-PVC.yaml
