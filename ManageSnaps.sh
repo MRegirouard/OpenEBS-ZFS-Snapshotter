@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # This script is intended to be run as a Kubernetes CronJob.
 # It will first create a new snapshot, then remove old snapshots using timegaps.
